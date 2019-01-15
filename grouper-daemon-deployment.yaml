@@ -1,0 +1,79 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: grouper-daemon
+  name: grouper-daemon
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: grouper-daemon
+    spec:
+      containers:
+      - args:
+        - bash
+        - -c
+        - while ! curl -s grouper-data:3306 > /dev/null; do echo waiting for mysql
+          on grouper_data to start; sleep 3; done; while ! curl -s ldap://directory:389
+          > /dev/null; do echo waiting for ldap on directory to start; sleep 3; done;
+          ln -sf /var/run/secrets/grouper-hibernate-properties/grouper.hibernate.properties /opt/grouper/grouper.apiBinary/conf/;
+          ln -sf /var/run/secrets/grouper-loader-properties/grouper-loader.properties  /opt/grouper/grouper.apiBinary/conf/;
+          ln -sf /var/run/secrets/subject-properties/subject.properties /opt/grouper/grouper.apiBinary/conf/;
+          exec daemon
+        env:
+        - name: ENV
+          value: /usr/share/Modules/init/profile.sh
+        - name: GROUPER_CLIENT_WEBSERVICE_PASSWORD_FILE
+          value: password
+        - name: GROUPER_DATABASE_PASSWORD_FILE
+          value: /run/secrets/g_database_password.txt/database_password.txt
+        - name: RABBITMQ_PASSWORD_FILE
+          value: /run/secrets/rabbitmq_password.txt/rabbitmq_password.txt
+        - name: SUBJECT_SOURCE_LDAP_PASSWORD
+          value: password
+        image: gcr.io/rcgrant-kromhout-test/complex_grouper_daemon
+        name: grouper-daemon
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/grouper/conf
+          name: grouper-daemon-claim0
+        - mountPath: /run/secrets/g_database_password.txt
+          name: g-database-password
+        - mountPath: /run/secrets/rabbitmq_password.txt
+          name: rabbitmq-password
+        - mountPath: /run/secrets/grouper-hibernate-properties
+          name: grouper-hibernate-properties
+        - mountPath: /run/secrets/grouper-loader-properties
+          name: grouper-loader-properties
+        - mountPath: /run/secrets/subject-properties
+          name: subject-properties
+      restartPolicy: Always
+      volumes:
+      - name: grouper-daemon-claim0
+        persistentVolumeClaim:
+          claimName: grouper-daemon-claim0
+      - name: g-database-password
+        secret:
+          secretName: g-database-password.txt
+      - name: rabbitmq-password
+        secret:
+          secretName: rabbitmq-password.txt
+      - name: grouper-hibernate-properties
+        secret:
+          secretName: grouper.hibernate.properties
+      - name: grouper-loader-properties
+        secret:
+          secretName: grouper-loader.properties
+      - name: subject-properties
+        secret:
+          secretName: subject.properties
+status: {}

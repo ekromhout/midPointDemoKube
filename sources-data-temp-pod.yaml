@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: sources-data-load-data
+  labels:
+    app: sources-data-loader
+spec:
+  volumes:
+    - name: sources-data
+      persistentVolumeClaim:
+        claimName: source-data
+  containers:
+    - name: sources-load-data
+      image: ubuntu
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: sources-data
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

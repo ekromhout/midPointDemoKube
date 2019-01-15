@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: idp
+  name: idp
+spec:
+  ports:
+  - name: "4443"
+    port: 4443
+    targetPort: 4443
+  selector:
+    io.kompose.service: idp
+status:
+  loadBalancer: {}

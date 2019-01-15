@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: ldap-load-data
+  labels:
+    app: ldap-loader
+spec:
+  volumes:
+    - name: datadir-ldap
+      persistentVolumeClaim:
+        claimName: ldap
+  containers:
+    - name: ldap-load-data
+      image: ubuntu
+      volumeMounts:
+      - name: datadir-ldap
+        mountPath: /var/lib/dirsrv
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

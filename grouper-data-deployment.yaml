@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: grouper-data
+    io.kompose.service: grouper-data
+  name: grouper-data
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grouper-data
+  template:
+    metadata:
+      labels:
+        app: grouper-data
+        io.kompose.service: grouper-data
+    spec:
+      containers:
+      - image: gcr.io/rcgrant-kromhout-test/complex_grouper_data
+        command: ["/bin/bash","-c"]
+        args: ["chown -R mysql /var/lib/mysql; mysqld_safe"]
+        name: grouper-data
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: grouper-data
+      restartPolicy: Always
+      volumes:
+      - name: grouper-data
+        persistentVolumeClaim:
+          claimName: grouper-data

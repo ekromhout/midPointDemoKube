@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: grouper-daemon-load-data
+  labels:
+    app: grouper-daemon-loader
+spec:
+  volumes:
+    - name: datadir-grouper-daemon
+      persistentVolumeClaim:
+        claimName: grouper-daemon-claim0
+  containers:
+    - name: grouper-daemon-load-data
+      image: ubuntu
+      volumeMounts:
+      - name: datadir-grouper-daemon
+        mountPath: /opt/grouper/conf
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

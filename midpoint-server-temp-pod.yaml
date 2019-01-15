@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: midpoint-server-load-data
+  labels:
+    app: midpoint-server-loader
+spec:
+  volumes:
+    - name: midpoint-server-claim0
+      persistentVolumeClaim:
+        claimName: midpoint-server-claim0
+    - name: midpoint-server-claim2
+      persistentVolumeClaim:
+        claimName: midpoint-server-claim2
+    - name: midpoint-server-claim3
+      persistentVolumeClaim:
+        claimName: midpoint-server-claim3
+  containers:
+    - name: midpoint-server-load-data
+      image: ubuntu
+      volumeMounts:
+      - name: midpoint-server-claim0
+        mountPath: /opt/midpoint/var
+      - name: midpoint-server-claim2
+        mountPath: /etc/shibboleth-volume
+      - name: midpoint-server-claim3
+        mountPath: /etc/pki/tls/certs
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

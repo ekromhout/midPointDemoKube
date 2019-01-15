@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: idp
+  name: idp
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: idp
+    spec:
+      containers:
+      - env:
+        - name: JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD
+          value: password
+        - name: JETTY_BROWSER_SSL_KEYSTORE_PASSWORD
+          value: password
+        - name: JETTY_MAX_HEAP
+          value: 64m
+        image: gcr.io/rcgrant-kromhout-test/complex_idp
+        name: idp
+        ports:
+        - containerPort: 4443
+        resources: {}
+      restartPolicy: Always
+status: {}

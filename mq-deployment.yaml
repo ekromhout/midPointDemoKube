@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mq
+  name: mq
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: mq
+    spec:
+      containers:
+      - env:
+        - name: RABBITMQ_NODENAME
+          value: docker-rabbit
+        image: gcr.io/rcgrant-kromhout-test/rabbitmq:management
+        name: mq
+        ports:
+        - containerPort: 15672
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: mq
+      hostname: rabbitmq
+      restartPolicy: Always
+      volumes:
+      - name: mq
+        persistentVolumeClaim:
+          claimName: mq
+status: {}

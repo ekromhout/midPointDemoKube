@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: grouper-ui-load-data
+  labels:
+    app: grouper-ui-loader
+spec:
+  volumes:
+    - name: grouper-ui-claim0
+      persistentVolumeClaim:
+        claimName: grouper-ui-claim0
+    - name: grouper-ui-claim1
+      persistentVolumeClaim:
+        claimName: grouper-ui-claim1
+    - name: grouper-ui-claim2
+      persistentVolumeClaim:
+        claimName: grouper-ui-claim2
+  containers:
+    - name: grouper-ui-load-data
+      image: ubuntu
+      volumeMounts:
+      - name: grouper-ui-claim0
+        mountPath: /opt/grouper/conf
+      - name: grouper-ui-claim1
+        mountPath: /etc/shibboleth
+      - name: grouper-ui-claim2
+        mountPath: /etc/pki/tls/certs
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

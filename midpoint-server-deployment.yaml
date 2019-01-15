@@ -1,0 +1,82 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: midpoint-server
+  name: midpoint-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: midpoint-server
+    spec:
+      containers:
+      - args:
+        - bash
+        - -c
+        - ln -sf /var/run/secrets/mp-sp-key.pem/sp-key.pem /run/secrets/mp_sp-key.pem;
+          ln -sf /var/run/secrets/mp-host-key.pem/host-key.pem /run/secrets/mp_host-key.pem;
+          ln -sf /var/run/secrets/mp-database-password.txt/database_password.txt /run/secrets/mp_database_password.txt;
+          ln -sf /var/run/secrets/mp-keystore-password.txt/keystore_password.txt /run/secrets/mp_keystore_password.txt;
+          ln -sf /etc/shibboleth-volume/idp-metadata.xml /etc/shibboleth/;
+          ln -sf /etc/shibboleth-volume/shibboleth2.xml /etc/shibboleth/;
+          ln -sf /etc/shibboleth-volume/sp-cert.pem /etc/shibboleth/;
+          export REPO_HOST=midpoint-data;
+          /usr/local/bin/startup.sh
+        env:
+        - name: ENV
+          value: demo
+        - name: REPO_HOST
+          value: midpoint-data
+        image: gcr.io/rcgrant-kromhout-test/complex_midpoint_server
+        name: midpoint-server
+        ports:
+        - containerPort: 443
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/midpoint/var
+          name: midpoint-server-claim0
+        - mountPath: /etc/shibboleth-volume
+          name: midpoint-server-claim2
+        - mountPath: /etc/pki/tls/certs/
+          name: midpoint-server-claim3
+        - mountPath: /var/run/secrets/mp-sp-key.pem
+          name: mp-sp-key
+        - mountPath: /var/run/secrets/mp-host-key.pem
+          name: mp-host-key
+        - mountPath: /var/run/secrets/mp-database-password.txt
+          name: mp-database-password
+        - mountPath: /var/run/secrets/mp-keystore-password.txt
+          name: mp-keystore-password
+      restartPolicy: Always
+      volumes:
+      - name: midpoint-server-claim0
+        persistentVolumeClaim:
+          claimName: midpoint-server-claim0
+      - name: midpoint-server-claim2
+        persistentVolumeClaim:
+          claimName: midpoint-server-claim2
+      - name: midpoint-server-claim3
+        persistentVolumeClaim:
+          claimName: midpoint-server-claim3
+      - name: mp-sp-key
+        secret:
+          secretName: mp-sp-key.pem
+      - name: mp-host-key
+        secret:
+          secretName: mp-host-key.pem
+      - name: mp-database-password
+        secret:
+          secretName: mp-database-password.txt
+      - name: mp-keystore-password
+        secret:
+          secretName: mp-keystore-password.txt
+status: {}

@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: grouper-data-load-data
+  labels:
+    app: grouper-data-loader
+spec:
+  volumes:
+    - name: datadir-grouper-data
+      persistentVolumeClaim:
+        claimName: grouper-data
+  containers:
+    - name: grouper-data-load-data
+      image: ubuntu
+      volumeMounts:
+      - name: datadir-grouper-data
+        mountPath: /var/lib/mysql
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: mq-data-load-data
+  labels:
+    app: mq-data-loader
+spec:
+  volumes:
+    - name: mq-data
+      persistentVolumeClaim:
+        claimName: mq
+  containers:
+    - name: mq-load-data
+      image: ubuntu
+      volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: mq-data
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]

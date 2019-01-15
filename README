@@ -1,0 +1,21 @@
+#This is a set of scripts to
+#copy the complex midPoint demo
+#into a Kubernetes cluster
+
+#This depends on a docker-compose build
+#already having been run in order
+#to build the populated volumes
+#via container layers that aren't
+#part of the end system. 
+#I'll be working on using init containers
+#or some other method to eliminate that
+#dependency.
+
+#The original complex demo with the
+#docker-compose is located here
+#https://github.internet2.edu/docker/midPoint_container.git
+#and is not copied in this project
+
+#The build.sh is a wrapper scripts for
+#all the other .sh scripts that are filled
+#with the needed kubectl commands

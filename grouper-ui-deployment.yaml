@@ -1,0 +1,103 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: grouper-ui
+  name: grouper-ui
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: grouper-ui
+    spec:
+      containers:
+      - args:
+        - bash
+        - -c
+        - while ! curl -s grouper-data:3306 > /dev/null; do echo waiting for mysql
+          on grouper_data to start; sleep 3; done; while ! curl -s ldap://directory:389
+          > /dev/null; do echo waiting for ldap on directory to start; sleep 3; done;
+          ln -sf /var/run/secrets/grouper-hibernate-properties/grouper.hibernate.properties /opt/grouper/grouper.ui/WEB-INF/classes/;
+          ln -sf /var/run/secrets/grouper-loader-properties/grouper-loader.properties  /opt/grouper/grouper.ui/WEB-INF/classes/;
+          ln -sf /var/run/secrets/subject-properties/subject.properties /opt/grouper/grouper.ui/WEB-INF/classes/;
+          ln -sf /var/run/secrets/g-sp-key.pem/sp-key.pem /etc/shibboleth/;
+          ln -sf /var/run/secrets/g-host-key.pem/host-key.pem /etc/pki/tls/private/host-key.pem;
+          ln -sf /etc/shibboleth-volume/idp-metadata.xml /etc/shibboleth/;
+          ln -sf /etc/shibboleth-volume/shibboleth2.xml /etc/shibboleth/;
+          ln -sf /etc/shibboleth-volume/sp-cert.pem /etc/shibboleth/;
+          exec ui
+        env:
+        - name: ENV
+          value: /usr/share/Modules/init/profile.sh
+        - name: GROUPER_DATABASE_PASSWORD_FILE
+          value: /run/secrets/g_database_password.txt
+        - name: SUBJECT_SOURCE_LDAP_PASSWORD
+          value: password
+        image: gcr.io/rcgrant-kromhout-test/complex_grouper_ui
+        name: grouper-ui
+        ports:
+        - containerPort: 443
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/grouper/conf
+          name: grouper-ui-claim0
+        - mountPath: /etc/shibboleth-volume
+          name: grouper-ui-claim1
+        - mountPath: /etc/pki/tls/certs
+          name: grouper-ui-claim2
+        - mountPath: /run/secrets/g_database_password.txt
+          name: g-database-password
+        - mountPath: /run/secrets/rabbitmq_password.txt
+          name: rabbitmq-password
+        - mountPath: /run/secrets/grouper-hibernate-properties
+          name: grouper-hibernate-properties
+        - mountPath: /run/secrets/grouper-loader-properties
+          name: grouper-loader-properties
+        - mountPath: /run/secrets/subject-properties
+          name: subject-properties
+        - mountPath: /run/secrets/g-sp-key.pem
+          name: g-sp-key
+        - mountPath: /run/secrets/g-host-key.pem
+          name: g-host-key
+
+      restartPolicy: Always
+      volumes:
+      - name: grouper-ui-claim0
+        persistentVolumeClaim:
+          claimName: grouper-ui-claim0
+      - name: grouper-ui-claim1
+        persistentVolumeClaim:
+          claimName: grouper-ui-claim1
+      - name: grouper-ui-claim2
+        persistentVolumeClaim:
+          claimName: grouper-ui-claim2
+      - name: g-database-password
+        secret:
+          secretName: g-database-password.txt
+      - name: rabbitmq-password
+        secret:
+          secretName: rabbitmq-password.txt
+      - name: grouper-hibernate-properties
+        secret:
+          secretName: grouper.hibernate.properties
+      - name: grouper-loader-properties
+        secret:
+          secretName: grouper-loader.properties
+      - name: subject-properties
+        secret:
+          secretName: subject.properties
+      - name: g-sp-key
+        secret:
+          secretName: g-sp-key.pem
+      - name: g-host-key
+        secret:
+          secretName: g-host-key.pem
+status: {}

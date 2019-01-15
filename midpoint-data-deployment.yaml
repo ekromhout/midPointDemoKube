@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: ./kompose convert
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: midpoint-data
+  name: midpoint-data
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: midpoint-data
+    spec:
+      containers:
+      - env:
+        - name: CREATE_NEW_DATABASE
+          value: if_needed
+        image: tier/mariadb:mariadb10
+        name: midpoint-data
+        ports:
+        - containerPort: 3306
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: midpoint-mysql
+        - mountPath: /var/lib/mysqlmounted
+          name: midpoint-data
+      restartPolicy: Always
+      volumes:
+      - name: midpoint-mysql
+        persistentVolumeClaim:
+          claimName: midpoint-mysql
+      - name: midpoint-data
+        persistentVolumeClaim:
+          claimName: midpoint-data
+status: {}

@@ -1,0 +1,23 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: midpoint-data-load-data
+  labels:
+    app: midpoint-data-loader
+spec:
+  volumes:
+    - name: midpoint-mysql
+      persistentVolumeClaim:
+        claimName: midpoint-mysql
+    - name: midpoint-data
+      persistentVolumeClaim:
+        claimName: midpoint-data
+  containers:
+    - name: midpoint-load-data
+      image: ubuntu
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: midpoint-mysql
+        - mountPath: /var/lib/mysqlmounted
+          name: midpoint-data
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]
